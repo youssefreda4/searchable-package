@@ -12,10 +12,6 @@ composer require youssefreda/searchable:@dev
 
 > Note: This version uses `@dev` stability flag — make sure your project allows it in `composer.json` or add:
 >
-> ```json
-> "minimum-stability": "dev",
-> "prefer-stable": true
-> ```
 
 ---
 
@@ -103,7 +99,24 @@ Output:
     'user' => 'User'
 ]
 ```
+### Blade Integration Example
 
+```blade
+@php
+    $columns = \App\Models\Apartment::getSearchColumnOptions();
+@endphp
+
+<select name="column" class="form-select">
+    <option value="all">{{ __('All Fields') }}</option>
+    @foreach($columns as $value => $label)
+        <option value="{{ $value }}" {{ request('column') === $value ? 'selected' : '' }}>
+            {{ __($label) }}
+        </option>
+    @endforeach
+</select>
+```
+
+> ✅ This snippet will allow the user to choose which column to search in. The list is auto-generated from the model's `$searchable` property.
 ---
 
 ## 🧪 Example Model: Apartment
