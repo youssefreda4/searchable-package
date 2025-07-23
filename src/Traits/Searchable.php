@@ -132,16 +132,21 @@ trait Searchable
         $field = $config['field'];
         $isNumeric = $this->shouldUseNumericSearch($config, $term);
 
-        if ($isNumeric && is_numeric($term)) {
-            $numericValue = (float)$term;
+        // Change from orWhere to where for strict filtering
+        $query->where(function (Builder $q) use ($field, $term, $isNumeric) {
+            if ($isNumeric && is_numeric($term)) {
+                $numericValue = (float)$term;
 
-            $query->orWhere(function (Builder $q) use ($field, $numericValue) {
                 $q->where($field, '=', $numericValue)
                     ->orWhereRaw("ABS(ROUND(CAST($field AS DECIMAL(15,4)), 0) - ?) < 0.0001", [$numericValue]);
-            });
-        } else {
-            $query->orWhere($field, 'LIKE', "%{$term}%");
-        }
+            } else {
+                if (preg_match('/[\x{0600}-\x{06FF}]/u', $term)) {
+                    $q->orWhereRaw("CONVERT(`{$field}` USING utf8mb4) LIKE ?", ['%' . $term . '%']);
+                } else {
+                    $q->orWhere($field, 'LIKE', "%{$term}%");
+                }
+            }
+        });
     }
 
     /**
