@@ -110,7 +110,7 @@ Output:
     <option value="all">{{ __('All Fields') }}</option>
     @foreach($columns as $value => $label)
         <option value="{{ $value }}" {{ request('column') === $value ? 'selected' : '' }}>
-            {{ __($label) }}
+            {{ $label }}
         </option>
     @endforeach
 </select>
